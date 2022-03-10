@@ -2,7 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Api\LoginController;
+use App\Http\Controllers\Api\UserManageController;
+use App\Http\Controllers\Api\MerchantController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -17,3 +19,37 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::group([
+    'middleware' => 'auth:sanctum'
+    // 'prefix' => 'auth'
+], function ($router) {
+    // Route::post('login', [LoginController::class, 'login']);
+    Route::post('login', [LoginController::class, 'login'])->name('login');
+    Route::post('logout', [LoginController::class, 'logout']);
+    Route::post('refresh', [LoginController::class, 'refresh']);
+    // Route::post('me', [LoginController::class, 'me']);
+});
+
+
+Route::get('/clear', function() {
+
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('config:cache');
+    Artisan::call('view:clear');
+ 
+    return "Cleared!";
+ 
+ });
+
+Route::post('create-user', [UserManageController::class, 'createUser']);
+
+Route::post('create-merchant', [MerchantController::class, 'createMerchant']);
+Route::post('open-merchant', [MerchantController::class, 'openMerchant']);
+Route::post('close-merchant', [MerchantController::class, 'closeMerchant']);
+
+
+Route::post('create-catagory', [MerchantController::class, 'createCatagory']);
+Route::post('edit-catagory', [MerchantController::class, 'editCatagory']);
+Route::post('delete-catagory', [MerchantController::class, 'deleteCatagory']);
