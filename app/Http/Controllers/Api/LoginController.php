@@ -10,7 +10,6 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
 
 
-
 // JWT-Auth
 // use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
@@ -18,13 +17,6 @@ use App\Models\User;
 
 class LoginController extends Controller
 {
-
-    // public function __construct()
-    // {
-    //     $this->middleware('auth:sanctum', [
-    //         'except' => ['login']
-    //     ]);
-    // }
 
     public function login(Request $request) {
 
@@ -43,6 +35,12 @@ class LoginController extends Controller
             return true;
         }
         return false;
+    }
+
+    public function me() {
+        return response()->json([
+            'user' => auth()->user(),
+        ]);
     }
 
     public function refresh(Request $request) {

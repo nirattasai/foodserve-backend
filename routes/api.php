@@ -24,23 +24,19 @@ Route::group([
     'middleware' => 'auth:sanctum'
     // 'prefix' => 'auth'
 ], function ($router) {
-    // Route::post('login', [LoginController::class, 'login']);
-    Route::post('login', [LoginController::class, 'login'])->name('login');
     Route::post('logout', [LoginController::class, 'logout']);
     Route::post('refresh', [LoginController::class, 'refresh']);
-    // Route::post('me', [LoginController::class, 'me']);
+    Route::get('me', [LoginController::class, 'me']);
 });
 
+Route::post('login', [LoginController::class, 'login'])->name('login');
 
 Route::get('/clear', function() {
-
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
     Artisan::call('config:cache');
     Artisan::call('view:clear');
- 
     return "Cleared!";
- 
  });
 
 Route::post('create-user', [UserManageController::class, 'createUser']);
@@ -53,3 +49,8 @@ Route::post('close-merchant', [MerchantController::class, 'closeMerchant']);
 Route::post('create-catagory', [MerchantController::class, 'createCatagory']);
 Route::post('edit-catagory', [MerchantController::class, 'editCatagory']);
 Route::post('delete-catagory', [MerchantController::class, 'deleteCatagory']);
+
+Route::post('create-menu', [MerchantController::class, 'createMenu']);
+Route::post('close-menu', [MerchantController::class, 'notReadyMenu']);
+Route::post('edit-menu', [MerchantController::class, 'editMenu']);
+Route::post('delete-menu', [MerchantController::class, 'deleteMenu']);

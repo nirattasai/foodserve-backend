@@ -20,13 +20,13 @@ use App\Models\Menu;
 class MerchantController extends Controller
 {   
     public function createMerchant (Request $request) {
-
+        $user = auth()->user();
         $merchant = new Merchant();
         $merchant->name = $request->input('name');
         $merchant->address = $request->input('address');
         $merchant->table = $request->input('table');
         $merchant->qr_code = $request->input('qrCode');
-        $merchant->owner_id = 1; // MUST BE IMPLEMENT LATER
+        $merchant->owner_id = $user->id; // MUST BE IMPLEMENT LATER
 
         $merchant->save();
 
@@ -82,7 +82,7 @@ class MerchantController extends Controller
     public function editCatagory (Request $request) {
         $catagory = Catagory::findOrFail($request->input('catagoryId'));
         $catagory->name = $request->input('name');
-        $catagory->save();  
+        $catagory->save();
 
         $merchant = Merchant::findOrFail($catagory->merchant_id);
 
@@ -103,4 +103,62 @@ class MerchantController extends Controller
             'catagory' => $merchant->catagories,
         ]);
     }
+    
+    public function createMenu (Request $request) {
+        $menu = new Menu();
+        $menu->name = $request->input('name');
+        $menu->price = $request->input('price');
+        $menu->detail = $request->input('detail');
+        if ($request->input('image') != null){
+            $menu->image = $request->input('image');
+        }
+        $menu->catagory_id = $request->input('catagoryId');
+        $menu->save();
+
+        return response()->json([
+            'success' => true,
+            'menu' => $menu,
+        ]);
+    }
+
+    public function notReadyMenu (Request $request) {
+        $menu = Menu::findOrFail($request->input('menuId'));
+        $menu->status = 'NOT_READY';
+        $menu->save();
+        return response()->json([
+            'success' => true,
+            'menu' => $menu,
+        ]);
+    }
+
+    public function deleteMenu (Request $request) {
+        $menu = Menu::findOrFail($request->input('menuId'));
+        $menu->delete();
+        return response()->json([
+            'success' => true,
+            'menu' => $menu,
+        ]);
+    }
+
+    public function editMenu (Request $request) {
+        $menu = Menu::findOrFail($request->input('menuId'));
+        if ($request->input('name') != null){
+            $menu->name = $request->input('name');
+        }
+        if ($request->input('price') != null){
+            $menu->price = $request->input('price');
+        }
+        if ($request->input('detail') != null){
+            $menu->detail = $request->input('detail');
+        }
+        if ($request->input('image') != null){
+            $menu->image = $request->input('image');
+        }
+        return response()->json([
+            'success' => true,
+            'menu' => $menu,
+        ]);
+    }
+
+    
 }
