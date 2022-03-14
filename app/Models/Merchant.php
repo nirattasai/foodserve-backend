@@ -29,4 +29,5 @@ class Merchant extends Model
     {
         return $this->hasMany(Catagory::class, 'merchant_id');
     }
+
 }

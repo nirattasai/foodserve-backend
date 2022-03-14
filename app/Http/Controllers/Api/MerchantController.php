@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\DB;
 
 use App\Models\User;
 use App\Models\Merchant;
@@ -43,22 +43,11 @@ class MerchantController extends Controller
         ]);
     }
 
-    public function openMerchant (Request $request) {
+    public function updateStatusMerchant (Request $request) {
         $merchant = Merchant::findOrFail($request->input('merchantId'));
-        $merchant->status = 'OPEN';
+        $merchant->status = $request->input('status');
         $merchant->save();
 
-        return response()->json([
-            'success' => true,
-            'merchant' => $merchant,
-        ]);
-    }
-
-    public function closeMerchant (Request $request) {
-        $merchant = Merchant::findOrFail($request->input('merchantId'));
-        $merchant->status = 'CLOSE';
-        $merchant->save();
-        
         return response()->json([
             'success' => true,
             'merchant' => $merchant,
@@ -121,9 +110,9 @@ class MerchantController extends Controller
         ]);
     }
 
-    public function notReadyMenu (Request $request) {
+    public function updateStatusMenu (Request $request) {
         $menu = Menu::findOrFail($request->input('menuId'));
-        $menu->status = 'NOT_READY';
+        $menu->status = $request->input('status');
         $menu->save();
         return response()->json([
             'success' => true,
@@ -160,5 +149,45 @@ class MerchantController extends Controller
         ]);
     }
 
-    
+    // query request
+
+    public function getMerchantWithId (Request $request) {
+        $merchant = Merchant::findOrFail($request->input('merchantId'));
+        return response()->json([
+            'success' => true,
+            'merchant' => $merchant,
+        ]);
+    }
+
+    public function getCatagories (Request $request) {
+        $merchant = Merchant::findOrFail($request->input('merchantId'));
+        $catagories = Catagory::where('merchant_id', $merchant->id)->get();
+        return response()->json([
+            'success' => true,
+            'catagories' => $catagories,
+        ]);
+    }
+
+    public function getMenuWithCatagoryId (Request $request) {
+        $catagory = Catagory::where('id', $request->input('catagoryId'))->first();
+        $menus = Menu::where('catagory_id', $catagory->id)->get();
+        return response()->json([
+            'success' => true,
+            'menus' => $menus,
+        ]);
+    }
+
+    public function getMenus (Request $request) {
+        $merchant_id = $request->input('merchantId');
+        $menus = Menu::whereIn('catagory_id', function ($q) use ($merchant_id) {
+            return $q->select(DB::raw('id'))
+                ->from('catagories')
+                ->where('merchant_id', $merchant_id);
+        })->get();
+
+        return response()->json([
+            'success' => true,
+            'menus' => $menus,
+        ]);
+    }
 }

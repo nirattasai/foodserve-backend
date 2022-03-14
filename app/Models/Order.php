@@ -8,22 +8,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Table extends Model
+class Order extends Model
 {
     use HasFactory;
 
-    public function orders(): HasMany
+    public function table(): BelongsTo
     {
-        return $this->hasMany(Order::class, 'table_id');
+        return $this->belongsTo(Table::class, 'table_id');
     }
 
-    public function merchant(): BelongsTo
+    public function menus(): BelongsToMany
     {
-        return $this->belongsTo(merchant::class, 'merchant_id');
+        return $this->belongsToMany(Menu::class,'order_menu','order_id','menu_id');
     }
 
-    public function bills(): HasMany
-    {
-        return $this->hasMany(Bill::class, 'table_id');
-    }
 }

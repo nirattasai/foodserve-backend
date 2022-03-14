@@ -23,10 +23,12 @@ class LoginController extends Controller
         $user = User::query()->where('username', $request->input('username'))->first();
 
         if (!$user || !Hash::check($request->input('password'), $user->password)) {
-            throw ValidationException::withMessages("Unauthorize");
+            return response()->json([
+                'error' => "Login Fail",
+            ]);
         }
 
-        return $this->respondWithToken($user->createToken('api')->plainTextToken);
+        return $this->respondWithToken($user->createToken('api')->plainTextToken, $user);
     }
 
     public function logout() {
@@ -47,13 +49,13 @@ class LoginController extends Controller
         return $this->respondWithToken(auth()->refresh());
     }
 
-    protected function respondWithToken($token)
+    protected function respondWithToken($token, $user=null)
     {
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => null,
-            'user' => auth()->user()
+            'user' => $user
         ]);
     }
 }
