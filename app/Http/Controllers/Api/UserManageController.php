@@ -21,8 +21,8 @@ class UserManageController extends Controller
 
         $user->username = $request->input('username');
         $user->password = Hash::make($request->input('password'));
-        $user->firstname = $request->input('firstname');
-        $user->lastname = $request->input('lastname');
+        $user->firstname = $request->input('firstName');
+        $user->lastname = $request->input('lastName');
         $user->email = $request->input('email');
         $user->telephone_number = $request->input('telephoneNumber');
         $user->id_number = $request->input('idNumber');

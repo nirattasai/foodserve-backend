@@ -56,6 +56,7 @@ Route::post('update-bill', [OrderController::class, 'updateBill']);
 //query merchant
 
 Route::post('merchant-id', [MerchantController::class, 'getMerchantWithId']);
+Route::post('merchant-user', [MerchantController::class, 'getMerchantWithUser']);
 Route::post('merchant-catagories', [MerchantController::class, 'getCatagories']);
 Route::post('catagory-menus', [MerchantController::class, 'getMenuWithCatagoryId']);
 Route::post('merchant-menus', [MerchantController::class, 'getMenus']);

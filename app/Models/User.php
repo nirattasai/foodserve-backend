@@ -46,8 +46,8 @@ class User extends Authenticatable
     ];
 
 
-    public function merchants(): HasMany
+    public function merchant(): BelongsTo
     {
-        return $this->hasMany(Merchant::class, 'owner_id');
+        return $this->belongsTo(Merchant::class, 'id','owner_id');
     }
 }

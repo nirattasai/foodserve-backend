@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('name');
             $table->float('price',15,4)->default(0);
             $table->string('detail');
-            $table->string('image')->nullable();
+            $table->longText('image')->nullable();
             $table->string('status')->default('READY');
             $table->foreignId('catagory_id')->references('id')->on('catagories');
         });

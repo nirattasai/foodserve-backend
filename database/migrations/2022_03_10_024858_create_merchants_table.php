@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('address');
             $table->integer('table');
-            $table->string('qr_code');
+            $table->longText('qr_code');
             $table->foreignId('owner_id')->references('id')->on('users');
             $table->string('status')->default('CLOSE');
         });

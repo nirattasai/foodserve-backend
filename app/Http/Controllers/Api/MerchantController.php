@@ -55,12 +55,14 @@ class MerchantController extends Controller
     }
 
     public function createCatagory (Request $request) {
+        $user = auth()->user();
         $catagory = new Catagory();
-        $catagory->merchant_id = $request->input('merchantId');
         $catagory->name = $request->input('name');
-        $catagory->save();  
+        $catagory->merchant_id = $user->merchant->id;
+        $catagory->save();
 
-        $merchant = Merchant::findOrFail($request->input('merchantId'));
+        $merchant = Merchant::findOrFail($user->merchant->id);
+        
 
         return response()->json([
             'success' => true,
@@ -143,6 +145,10 @@ class MerchantController extends Controller
         if ($request->input('image') != null){
             $menu->image = $request->input('image');
         }
+        if ($request->input('status') != null){
+            $menu->status = $request->input('status');
+        }
+        $menu->save();
         return response()->json([
             'success' => true,
             'menu' => $menu,
@@ -159,9 +165,18 @@ class MerchantController extends Controller
         ]);
     }
 
+    public function getMerchantWithUser (Request $request) {
+        $user = auth()->user();
+        $merchant = Merchant::find($user->merchant->id);
+        return response()->json([
+            'success' => true,
+            'merchant' => $merchant,
+        ]);
+    }
+
     public function getCatagories (Request $request) {
-        $merchant = Merchant::findOrFail($request->input('merchantId'));
-        $catagories = Catagory::where('merchant_id', $merchant->id)->get();
+        $user = auth()->user();
+        $catagories = $user->merchant->catagories;
         return response()->json([
             'success' => true,
             'catagories' => $catagories,
@@ -178,11 +193,11 @@ class MerchantController extends Controller
     }
 
     public function getMenus (Request $request) {
-        $merchant_id = $request->input('merchantId');
-        $menus = Menu::whereIn('catagory_id', function ($q) use ($merchant_id) {
+        $user = auth()->user();
+        $menus = Menu::whereIn('catagory_id', function ($q) use ($user) {
             return $q->select(DB::raw('id'))
                 ->from('catagories')
-                ->where('merchant_id', $merchant_id);
+                ->where('merchant_id', $user->merchant->id);
         })->get();
 
         return response()->json([
