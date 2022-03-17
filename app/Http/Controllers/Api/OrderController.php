@@ -35,9 +35,11 @@ class OrderController extends Controller
         foreach($menus as $menu) {
             array_push($data, [
                 'order_id' => $order->id,
-                'menu_id' => $menu,
+                'menu_id' => $menu['menuId'],
+                'amount' => $menu['amount'],
             ]);
         }
+
 
         DB::table('order_menu')->insert($data);
 
@@ -106,24 +108,76 @@ class OrderController extends Controller
 
     // query order 
     public function getOrders(Request $request) {
-        $orders = Order::whereIn('table_id', function ($q) use ($request) {
+        $user = auth()->user();
+        $orders = Order::whereIn('table_id', function ($q) use ($user) {
             return $q->select(DB::raw('id'))
             ->from('tables')
-            ->where('merchant_id', $request->input('merchantId'));
-        })->where('status', $request->input('status'))->get();
+            ->where('merchant_id', $user->merchant->id);
+        })->get();
+        $orders_output = [];
+
+        foreach ($orders as $order){
+            array_push($orders_output, [
+                "id" => $order->id,
+                "status" => $order->status,
+                "price" => $order->price,
+                "type" => $order->type,
+                "tableNumber" => $order->table->number,
+            ]);
+        }
+        
 
         return response()->json([
             'success' => true,
-            'orders' => $orders,
+            'orders' => $orders_output,
+        ]);
+    }
+
+    public function getOrdersWithStatus(Request $request) {
+        $user = auth()->user();
+        $orders = Order::whereIn('table_id', function ($q) use ($user) {
+            return $q->select(DB::raw('id'))
+            ->from('tables')
+            ->where('merchant_id', $user->merchant->id);
+        })->where('status', $request->input('status'))->get();
+
+        $orders_output = [];
+
+        foreach ($orders as $order){
+            array_push($orders_output, [
+                "id" => $order->id,
+                "status" => $order->status,
+                "price" => $order->price,
+                "type" => $order->type,
+                "tableNumber" => $order->table->number,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'orders' => $orders_output,
         ]);
     }
 
     public function getMenuInOrder(Request $request) {
-        $order = Order::findOrFail($request->input('orderId'));
+        $menus = DB::table('order_menu')
+        ->where('order_id', $request->input('orderId'))
+        ->get();
+
+        $menus_output = [];
+
+        foreach($menus as $menu){
+            $m = Menu::find($menu->menu_id);
+            array_push($menus_output, [
+                'name' => $m->name,
+                'price' => $m->price,
+                'amount' => $menu->amount,
+            ]);
+        }
+
         return response()->json([
             'success' => true,
-            'order' => $order,
-            'menus' => $order->menus,
+            'menus' => $menus_output,
         ]);
     }
 }

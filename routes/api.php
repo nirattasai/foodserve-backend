@@ -64,4 +64,5 @@ Route::post('merchant-menus', [MerchantController::class, 'getMenus']);
 // query order
 
 Route::post('get-orders', [OrderController::class, 'getOrders']);
+Route::post('orders-with-status', [OrderController::class, 'getOrdersWithStatus']);
 Route::post('order-menus', [OrderController::class, 'getMenuInOrder']);

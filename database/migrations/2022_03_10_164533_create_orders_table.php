@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamps();
             $table->foreignId('table_id')->references('id')->on('tables');
             $table->string('status')->default('WAITING'); //waiting, prepare, served, payment, paid
-            $table->float('price',15,4);
+            $table->float('price',15,4)->default(0);
             $table->string('type'); //take_home, here
         });
     }

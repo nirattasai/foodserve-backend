@@ -19,6 +19,7 @@ return new class extends Migration
             $table->timestamps();
             $table->foreignId('order_id')->references('id')->on('orders');
             $table->foreignId('menu_id')->references('id')->on('menus');
+            $table->integer('amount')->default(1);
         });
     }
 
