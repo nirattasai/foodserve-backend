@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\UserManageController;
 use App\Http\Controllers\Api\MerchantController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\CustomerController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -46,7 +47,6 @@ Route::post('update-status-menu', [MerchantController::class, 'updateStatusMenu'
 Route::post('edit-menu', [MerchantController::class, 'editMenu']);
 Route::post('delete-menu', [MerchantController::class, 'deleteMenu']);
 
-Route::post('checkin-table', [OrderController::class, 'checkinTable']);
 Route::post('create-order', [OrderController::class, 'createOrder']);
 Route::post('update-status-order', [OrderController::class, 'updateStatusOrder']);
 
@@ -60,9 +60,16 @@ Route::post('merchant-user', [MerchantController::class, 'getMerchantWithUser'])
 Route::post('merchant-catagories', [MerchantController::class, 'getCatagories']);
 Route::post('catagory-menus', [MerchantController::class, 'getMenuWithCatagoryId']);
 Route::post('merchant-menus', [MerchantController::class, 'getMenus']);
+Route::post('merchant-table', [MerchantController::class, 'getTables']);
 
 // query order
 
 Route::post('get-orders', [OrderController::class, 'getOrders']);
 Route::post('orders-with-status', [OrderController::class, 'getOrdersWithStatus']);
 Route::post('order-menus', [OrderController::class, 'getMenuInOrder']);
+
+// query bills
+Route::post('get-bills', [OrderController::class, 'getBills']);
+
+//query Page
+Route::post('customer-page', [CustomerController::class, 'customerPage']);

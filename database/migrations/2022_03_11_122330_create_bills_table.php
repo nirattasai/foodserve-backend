@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('bills', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->float('price',15,4);
+            $table->float('price',15,4)->default(0);
             $table->string('status')->default('NOT_PAID');
             $table->foreignId('table_id')->references('id')->on('tables');
         });

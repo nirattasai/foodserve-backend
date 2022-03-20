@@ -205,4 +205,13 @@ class MerchantController extends Controller
             'menus' => $menus,
         ]);
     }
+
+    public function getTables (Request $request) {
+        $user = auth()->user();
+        $tables = Table::where('merchant_id', $user->merchant->id)->get();
+        return response()->json([
+            'success' => true,
+            'tables' => $tables,
+        ]);
+    }
 }

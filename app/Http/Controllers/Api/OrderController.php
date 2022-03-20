@@ -61,22 +61,11 @@ class OrderController extends Controller
         ]);
     }
 
-    public function checkinTable(Request $request){
-        $table = Table::findOrFail($request->input('tableId'));
-        $table->status = 'NOT_FREE';
-        $table->save();
-
-        return response()->json([
-            'success' => true,
-            'table' => $table,
-        ]);
-    }
-
     public function createBill(Request $request) {
         $bill = new Bill();
-        $bill->save();
         $price = 0.0;
         $orderId = $request->input('orderId');
+        $table_id = 0;
 
         foreach ($orderId as $order){
             $order = Order::findOrFail($order);
@@ -84,8 +73,10 @@ class OrderController extends Controller
             $order->bill_id = $bill->id;
             $order->save();
             $price += $order->price;
-        }        
+            $table_id = $order->table_id;
+        } 
 
+        $bill->table_id = $table_id;
         $bill->price = $price;
         $bill->save();
 
@@ -179,5 +170,19 @@ class OrderController extends Controller
             'success' => true,
             'menus' => $menus_output,
         ]);
+    }
+
+    public function getBills(Request $request) {
+        $user = auth()->user();
+        $bills = Bill::whereIn('table_id', function ($q) use ($user){
+            return $q->select(DB::raw("id"))
+            ->from('tables')
+            ->where('merchant_id', $user->merchant->id)
+            ->get();
+        })->get();
+        return response()->json([
+            'success' => true,
+            'bills' => $bills,
+        ]);    
     }
 }
