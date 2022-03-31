@@ -22,9 +22,9 @@ class UserSeeder extends Seeder
             'password' => Hash::make('admin'),
             'firstname' => 'nirattasai',
             'lastname' => 'haree',
-            'id_number' => '1499900266409',
-            'telephone_number' => '0969587481',
-            'email' => 'nirattasai@gmail.com',
+            'id_number' => '123',
+            'telephone_number' => '123',
+            'email' => '123@gmail.com',
         ]);
     }
 }

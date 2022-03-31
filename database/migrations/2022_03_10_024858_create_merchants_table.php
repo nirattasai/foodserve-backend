@@ -16,10 +16,10 @@ return new class extends Migration
         Schema::create('merchants', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('name');
-            $table->string('address');
-            $table->integer('table');
-            $table->longText('qr_code');
+            $table->string('name')->nullable();
+            $table->string('address')->nullable();
+            $table->integer('table')->nullable();
+            $table->longText('qr_code')->nullable();
             $table->foreignId('owner_id')->references('id')->on('users');
             $table->string('status')->default('CLOSE');
         });

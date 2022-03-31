@@ -19,6 +19,7 @@ return new class extends Migration
             $table->float('price',15,4)->default(0);
             $table->string('status')->default('NOT_PAID');
             $table->foreignId('table_id')->references('id')->on('tables');
+            $table->longText('slip')->nullable();
         });
     }
 

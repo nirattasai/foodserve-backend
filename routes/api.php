@@ -65,11 +65,21 @@ Route::post('merchant-table', [MerchantController::class, 'getTables']);
 // query order
 
 Route::post('get-orders', [OrderController::class, 'getOrders']);
-Route::post('orders-with-status', [OrderController::class, 'getOrdersWithStatus']);
 Route::post('order-menus', [OrderController::class, 'getMenuInOrder']);
+Route::post('my-order', [OrderController::class, 'myOrder']);
 
 // query bills
 Route::post('get-bills', [OrderController::class, 'getBills']);
 
 //query Page
 Route::post('customer-page', [CustomerController::class, 'customerPage']);
+
+Route::post('dashboard', [MerchantController::class, 'dashboard']);
+Route::post('monthlyReport', [MerchantController::class, 'monthlyReport']);
+
+Route::get('downloadDailyReport', [MerchantController::class, 'downloadDailyReport']);
+Route::get('downloadMonthlyReport', [MerchantController::class, 'downloadMonthlyReport']);
+
+Route::post('cancel-order', [OrderController::class, 'cancelOrder']);
+
+Route::post('upload-slip', [OrderController::class, 'uploadSlip']);

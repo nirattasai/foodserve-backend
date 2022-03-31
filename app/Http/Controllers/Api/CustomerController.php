@@ -26,7 +26,7 @@ class CustomerController extends Controller
     public function customerPage(Request $request){
         $table = Table::find($request->input('tableId'));
 
-        $table->status = 'NOT_FREE';
+        $table->status = 'NOT_READY';
         $table->save();
 
         $merchant = Merchant::find($table->merchant_id);

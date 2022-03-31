@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 
 
 use App\Models\User;
+use App\Models\Merchant;
 
 
 class UserManageController extends Controller
@@ -29,9 +30,14 @@ class UserManageController extends Controller
 
         $user->save();
 
+        $merchant = new Merchant();
+        $merchant->owner_id = $user->id;
+        $merchant->save();
+
         return response()->json([
             'success' => true,
             'user' => $user,
+            'token' => $user->createToken('api')->plainTextToken,
         ]);
     }
 }

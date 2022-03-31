@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('merchant_id')->references('id')->on('merchants');
             $table->string('number');
             $table->string('status')->default('READY');
+            $table->longText('qr_code')->nullable();
         });
     }
 

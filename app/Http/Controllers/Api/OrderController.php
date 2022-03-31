@@ -10,8 +10,6 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
-
-
 use App\Models\User;
 use App\Models\Merchant;
 use App\Models\Catagory;
@@ -35,8 +33,9 @@ class OrderController extends Controller
         foreach($menus as $menu) {
             array_push($data, [
                 'order_id' => $order->id,
-                'menu_id' => $menu['menuId'],
+                'menu_id' => $menu['menu']['id'],
                 'amount' => $menu['amount'],
+                'created_at' => $order->created_at,
             ]);
         }
 
@@ -65,10 +64,15 @@ class OrderController extends Controller
         $bill = new Bill();
         $price = 0.0;
         $orderId = $request->input('orderId');
-        $table_id = 0;
+        $tableId = $request->input('tableId');
+        $bill->table_id = $tableId;
+        $bill->save();
 
         foreach ($orderId as $order){
             $order = Order::findOrFail($order);
+            if($order->status == 'CANCELED'){
+                continue;
+            }
             $order->status = 'PAYMENT';
             $order->bill_id = $bill->id;
             $order->save();
@@ -76,7 +80,6 @@ class OrderController extends Controller
             $table_id = $order->table_id;
         } 
 
-        $bill->table_id = $table_id;
         $bill->price = $price;
         $bill->save();
 
@@ -91,6 +94,12 @@ class OrderController extends Controller
         $bill->status = $request->input('status');
         $bill->save();
 
+        if($request->input('status') == 'PAID') {
+            $table = Table::find($bill->table->id);
+            $table->status = 'READY';
+            $table->save();
+        }
+
         return response()->json([
             'success' => true,
             'bill' => $bill,
@@ -100,11 +109,28 @@ class OrderController extends Controller
     // query order 
     public function getOrders(Request $request) {
         $user = auth()->user();
-        $orders = Order::whereIn('table_id', function ($q) use ($user) {
-            return $q->select(DB::raw('id'))
-            ->from('tables')
-            ->where('merchant_id', $user->merchant->id);
-        })->get();
+        $dateFilter = $request->input('dateFilter');
+        $statusFilter = $request->input('statusFilter');
+        if($statusFilter == "ALL") {
+            $orders = Order::whereIn('table_id', function ($q) use ($user) {
+                return $q->select(DB::raw('id'))
+                ->from('tables')
+                ->where('merchant_id', $user->merchant->id);
+            })
+            ->whereDate('created_at', $dateFilter)
+            ->get();
+        }
+        else {
+            $orders = Order::whereIn('table_id', function ($q) use ($user) {
+                return $q->select(DB::raw('id'))
+                ->from('tables')
+                ->where('merchant_id', $user->merchant->id);
+            })
+            ->whereDate('created_at', $dateFilter)
+            ->where('status', $statusFilter)
+            ->get();
+        }
+        
         $orders_output = [];
 
         foreach ($orders as $order){
@@ -117,32 +143,6 @@ class OrderController extends Controller
             ]);
         }
         
-
-        return response()->json([
-            'success' => true,
-            'orders' => $orders_output,
-        ]);
-    }
-
-    public function getOrdersWithStatus(Request $request) {
-        $user = auth()->user();
-        $orders = Order::whereIn('table_id', function ($q) use ($user) {
-            return $q->select(DB::raw('id'))
-            ->from('tables')
-            ->where('merchant_id', $user->merchant->id);
-        })->where('status', $request->input('status'))->get();
-
-        $orders_output = [];
-
-        foreach ($orders as $order){
-            array_push($orders_output, [
-                "id" => $order->id,
-                "status" => $order->status,
-                "price" => $order->price,
-                "type" => $order->type,
-                "tableNumber" => $order->table->number,
-            ]);
-        }
 
         return response()->json([
             'success' => true,
@@ -174,15 +174,71 @@ class OrderController extends Controller
 
     public function getBills(Request $request) {
         $user = auth()->user();
-        $bills = Bill::whereIn('table_id', function ($q) use ($user){
-            return $q->select(DB::raw("id"))
-            ->from('tables')
-            ->where('merchant_id', $user->merchant->id)
+        $dateFilter = $request->input('dateFilter');
+        $statusFilter = $request->input('statusFilter');
+
+        if ($statusFilter == 'ALL') {
+            $bills = Bill::whereIn('table_id', function ($q) use ($user){
+                return $q->select(DB::raw("id"))
+                ->from('tables')
+                ->where('merchant_id', $user->merchant->id)
+                ->get();
+            })->whereDate('created_at', $dateFilter)->get();
+        }
+        else {
+            $bills = Bill::whereIn('table_id', function ($q) use ($user){
+                return $q->select(DB::raw("id"))
+                ->from('tables')
+                ->where('merchant_id', $user->merchant->id)
+                ->get();
+            })
+            ->whereDate('created_at', $dateFilter)
+            ->where('status', $statusFilter)
             ->get();
-        })->get();
+        }
         return response()->json([
             'success' => true,
             'bills' => $bills,
         ]);    
     }
+
+    public function myOrder(Request $request) {
+        $orders = Order::where('table_id', $request->input('tableId'))
+        ->where('status', '!=', 'PAYMENT')
+        ->where('status', '!=', 'PAID')->get();
+
+        return response()->json([
+            'success' => true,
+            'orders' => $orders,
+        ]);    
+    }
+
+    public function cancelOrder(Request $request) {
+        $order = Order::find($request->input('orderId'));
+        $order->status = 'CANCELED';
+        $order->save();
+        return response()->json([
+            'success' => true,
+            'order' => $order,
+        ]);
+    }
+
+    public function uploadSlip(Request $request) {
+        $bill = Bill::findOrFail($request->input('billId'));
+        $bill->slip = $request->input('slip');
+        $bill->status = 'WAITING';
+        $bill->save();
+
+        if($request->input('status') == 'PAID') {
+            $table = Table::find($bill->table->id);
+            $table->status = 'READY';
+            $table->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'bill' => $bill,
+        ]);
+    }
+
 }
