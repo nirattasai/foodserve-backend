@@ -35,10 +35,10 @@ class OrderController extends Controller
                 'order_id' => $order->id,
                 'menu_id' => $menu['menu']['id'],
                 'amount' => $menu['amount'],
+                'status' => 'READY',
                 'created_at' => $order->created_at,
             ]);
         }
-
 
         DB::table('order_menu')->insert($data);
 
@@ -52,6 +52,14 @@ class OrderController extends Controller
     public function updateStatusOrder(Request $request){
         $order = Order::findOrFail($request->input('orderId'));
         $order->status = $request->input('status');
+
+        if ($order->status == 'CANCELED') {
+            DB::table('order_menu')
+            ->where('order_id', $order->id)
+            ->update(array(
+                'status' => $order->status,
+            ));
+        }
 
         $order->save();
         return response()->json([
@@ -205,6 +213,7 @@ class OrderController extends Controller
     public function myOrder(Request $request) {
         $orders = Order::where('table_id', $request->input('tableId'))
         ->where('status', '!=', 'PAYMENT')
+        ->where('status', '!=', 'CANCELED')
         ->where('status', '!=', 'PAID')->get();
 
         return response()->json([
@@ -217,6 +226,12 @@ class OrderController extends Controller
         $order = Order::find($request->input('orderId'));
         $order->status = 'CANCELED';
         $order->save();
+
+        DB::table('order_menu')
+        ->where('order_id', $order->id)
+        ->update(array(
+            'status' => $order->status,
+        ));
         return response()->json([
             'success' => true,
             'order' => $order,

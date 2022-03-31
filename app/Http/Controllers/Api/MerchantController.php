@@ -394,18 +394,16 @@ class MerchantController extends Controller
         })->get();
 
         foreach ($menus as $menu) {
-            foreach($orders as $order){
                 array_push($menuArr, [
                     'id' => $menu->id,
                     'menu' => $menu->name,
                     'price' => $menu->price,
                     'amount' => DB::table('order_menu')
                     ->where('menu_id','=', $menu->id)
-                    ->where('order_id', '=', $order['id'])
+                    ->where('status', '!=', 'CANCELED')
                     ->whereDate('created_at', $date)
                     ->sum('amount'),
                 ]);
-            }
         }
 
 
@@ -468,18 +466,16 @@ class MerchantController extends Controller
         })->get();
 
         foreach ($menus as $menu) {
-            foreach($orders as $order){
                 array_push($menuArr, [
                     'id' => $menu->id,
                     'menu' => $menu->name,
                     'price' => $menu->price,
                     'amount' => DB::table('order_menu')
                     ->where('menu_id','=', $menu->id)
-                    ->where('order_id', '=', $order['id'])
+                    ->where('status', '!=', 'CANCELED')
                     ->whereBetween('created_at', [$from, $to])
                     ->sum('amount'),
                 ]);
-            }
         }
 
 
